@@ -1,30 +1,11 @@
 {
-  "login_title": "Login",
-  "login_description": "Please enter your username and password",
-  "login_username": "Username",
-  "login_password": "Password",
-  "login_success": "Login successful",
-  "login_failure": "Login failed",
-  "form_username_required": "Username is required",
-  "form_password_required": "Password is required",
-  "form_username_placeholder": "Please enter your username",
-  "form_password_placeholder": "Please enter your password",
-  "form_username_pattern": "Please enter a username between 8 and 16 characters",
-  "form_password_pattern": "Please enter a password of at least 12 characters including uppercase, lowercase, and numbers",
+  "asia-pacific": "Asia Pacific",
+  "north-america": "North America",
 
-  "select_placeholder": "Select a language",
+  "select_country_placeholder": "Select a country",
+  "select_lang_placeholder": "Select a language",
   "select_lang_en": "English",
   "select_lang_zh": "繁體中文",
-
-  "toast_loading": "Loading...",
-  "toast_login_success": "Login successful",
-  "toast_login_failure": "Login failed",
-  "toast_verify_success": "Verify successful",
-  "toast_verify_failure": "Verify failed",
-  "toast_logout_success": "Logout successful",
-
-  "nav_preference": "Preference",
-  "nav_user": "User",
 
   "preference_language": "Language Preference",
   "preference_theme": "System Theme"

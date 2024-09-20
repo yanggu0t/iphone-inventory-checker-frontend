@@ -1,7 +1,5 @@
-import { Outlet } from "@tanstack/react-router";
-
-const AppLayout = () => {
-  return <Outlet />;
+const AppLayout = ({ children }: React.PropsWithChildren) => {
+  return children;
 };
 
-export { AppLayout };
+export default AppLayout;

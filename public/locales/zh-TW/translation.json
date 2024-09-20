@@ -1,30 +1,11 @@
 {
-  "login_title": "登入",
-  "login_description": "請輸入你的帳號密碼",
-  "login_username": "使用者帳號",
-  "login_password": "密碼",
-  "login_success": "登入成功",
-  "login_failure": "登入失敗",
-  "form_username_required": "必須填寫帳號",
-  "form_password_required": "必須填寫密碼",
-  "form_username_placeholder": "請輸入使用者帳號",
-  "form_password_placeholder": "請輸入密碼",
-  "form_username_pattern": "請輸入 8 - 16 位帳號",
-  "form_password_pattern": "請輸入 12 位以上密碼須包含大小寫英文和數字",
+  "asia-pacific": "亞洲",
+  "north-america": "北美",
 
-  "select_placeholder": "選擇語言",
+  "select_country_placeholder": "選擇國家",
+  "select_lang_placeholder": "選擇語言",
   "select_lang_en": "English",
   "select_lang_zh": "繁體中文",
-
-  "toast_loading": "載入中...",
-  "toast_login_success": "登入成功",
-  "toast_login_failure": "登入失敗",
-  "toast_logout_success": "登出成功",
-  "toast_verify_success": "驗證身分成功",
-  "toast_verify_failure": "驗證身分失敗",
-
-  "nav_preference": "偏好設定",
-  "nav_user": "使用者",
 
   "preference_language": "偏好語言",
   "preference_theme": "系統主題"

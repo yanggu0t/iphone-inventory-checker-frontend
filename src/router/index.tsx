@@ -3,9 +3,8 @@ import {
   createRoute,
   createRouter,
 } from "@tanstack/react-router";
-import { MainLayout } from "../layouts/Main";
-import { AppLayout } from "../layouts/App";
-import { NotFound } from "../pages";
+import { MainLayout } from "../layouts";
+import { App, Home, NotFound } from "../pages";
 
 const rootRoute = createRootRoute({
   component: MainLayout,
@@ -14,10 +13,16 @@ const rootRoute = createRootRoute({
 const appRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/app",
-  component: AppLayout,
+  component: App,
 });
 
-const routeTree = rootRoute.addChildren([]);
+const homeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/",
+  component: Home,
+});
+
+const routeTree = rootRoute.addChildren([appRoute, homeRoute]);
 
 export const router = createRouter({
   routeTree,

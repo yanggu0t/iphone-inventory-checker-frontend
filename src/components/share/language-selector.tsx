@@ -12,7 +12,7 @@ interface IProps {
   className?: string;
 }
 
-const LanguageSwitcher = ({ className }: IProps) => {
+const LanguageSelector = ({ className }: IProps) => {
   const { i18n, t } = useTranslation();
 
   const handleLanguageChange = (value: string) => {
@@ -28,7 +28,7 @@ const LanguageSwitcher = ({ className }: IProps) => {
     <div className={className}>
       <Select value={i18n.language} onValueChange={handleLanguageChange}>
         <SelectTrigger className="min-w-36">
-          <SelectValue placeholder={t("select_placeholder")} />
+          <SelectValue placeholder={t("select_lang_placeholder")} />
         </SelectTrigger>
         <SelectContent>
           {languages.map(({ code, title, icon: Icon }) => (
@@ -45,4 +45,4 @@ const LanguageSwitcher = ({ className }: IProps) => {
   );
 };
 
-export default LanguageSwitcher;
+export default LanguageSelector;

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { setLocalStorage, getLocalStorage } from "@/utils/tools";
+import { getLocalStorage } from "@/utils/tools";
 import { LOCAL_STORAGE } from "@/utils/enums";
 
 const service = axios.create({
@@ -7,7 +7,8 @@ const service = axios.create({
 });
 
 service.interceptors.request.use((config) => {
-  config.headers["Accept-Language"] = "tw";
+  config.headers["Accept-Language"] =
+    getLocalStorage(LOCAL_STORAGE.APPLE_LANG_TAG) || "";
   return config;
 });
 

@@ -1,3 +1,6 @@
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
 /**
  * 取得 localStorage 的值，如果找不到該值則回傳 null
  * @param key
@@ -35,3 +38,7 @@ export const removeLocalStorage = (key?: string) => {
     localStorage.clear();
   }
 };
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}

@@ -1,7 +1,7 @@
 import ReactDOM from "react-dom/client";
 import { StrictMode } from "react";
 import { RouterProvider } from "@tanstack/react-router";
-import { ThemeProvider } from "./components/provider";
+import { ThemeProvider } from "./components/provider/theme";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { I18nextProvider } from "react-i18next";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";

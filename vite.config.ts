@@ -13,8 +13,7 @@ export default defineConfig({
     port: 5555,
     proxy: {
       "/api": {
-        // target: "https://apple-api.yanggu0t.in/",
-        target: "http://localhost:8080/",
+        target: "https://apple-api.yanggu0t.in/",
         changeOrigin: true,
         rewrite: (path) => {
           return path.replace(/^\/api/, "");

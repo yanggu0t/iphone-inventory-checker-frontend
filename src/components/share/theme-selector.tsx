@@ -12,7 +12,7 @@ interface IProps {
   className?: string;
 }
 
-const ThemeSwitcher = ({ className }: IProps) => {
+const ThemeSelector = ({ className }: IProps) => {
   const { theme, setTheme } = useTheme();
 
   return (
@@ -36,7 +36,7 @@ const ThemeSwitcher = ({ className }: IProps) => {
   );
 };
 
-export default ThemeSwitcher;
+export default ThemeSelector;
 
 const themes = [
   { code: "light", title: "Light", icon: Sun },
