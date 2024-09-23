@@ -17,13 +17,13 @@ if (!rootElement.innerHTML) {
   root.render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
-        <I18nextProvider i18n={i18n}>
-          <ThemeProvider defaultTheme="dark">
-            <TooltipProvider>
-              <RouterProvider router={router} />
-            </TooltipProvider>
-          </ThemeProvider>
-        </I18nextProvider>
+        {/* <I18nextProvider i18n={i18n}> */}
+        <ThemeProvider defaultTheme="dark">
+          <TooltipProvider>
+            <RouterProvider router={router} />
+          </TooltipProvider>
+        </ThemeProvider>
+        {/* </I18nextProvider> */}
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </StrictMode>,

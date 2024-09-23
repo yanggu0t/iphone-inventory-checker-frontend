@@ -1,9 +1,3 @@
-import {
-  CapacitiesSelector,
-  ColorSelector,
-  CountrySelector,
-  ModelSelector,
-} from "@/components/share";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,7 +11,6 @@ import { Typography } from "@/components/ui/typography";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -25,15 +18,10 @@ import {
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { useStore } from "@/stores";
-import { useEffect, useMemo } from "react";
-import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
-import { getLocales, getModels } from "@/service/api/apple";
-import { setLocalStorage } from "@/utils/tools";
-import { LOCAL_STORAGE } from "@/utils/enums";
+import { getModels } from "@/service/api/apple";
 import {
   Select,
   SelectContent,
@@ -42,57 +30,72 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
-
-const formSchema = z.object({
-  country: z.string({ required_error: "Country is required" }),
-  model: z.string({ required_error: "Model is required" }),
-  capacities: z.string({ required_error: "Capacities are required" }),
-  color: z.string({ required_error: "Color is required" }),
-});
+import { useNavigate } from "@tanstack/react-router";
+import { getLocalStorage } from "@/utils/tools";
+import { LOCAL_STORAGE } from "@/utils/enums";
+import { Input } from "@/components/ui/input";
 
 const App = () => {
+  const navigate = useNavigate();
+  const langTag = getLocalStorage(
+    LOCAL_STORAGE.APPLE_LANG_TAG,
+  ) as unknown as string;
   const model = useStore((state) => state.apple.model);
-  const langTag = useStore((state) => state.apple.langTag);
+  const search = useStore((state) => state.apple.config?.search);
   const setModel = useStore((state) => state.apple.setModel);
   const setLangTag = useStore((state) => state.apple.setLangTag);
 
   const capacities = model ? model.capacities : [];
   const colors = model ? model.colors : [];
 
+  const formSchema = z.object({
+    model: z.string({ required_error: "型號為必填項" }),
+    capacities: z.string({ required_error: "容量為必填項" }),
+    color: z.string({ required_error: "顏色為必填項" }),
+    zipCode: z
+      .string({
+        required_error:
+          search?.validation?.zip?.requiredError || "郵遞區號為必填項",
+      })
+      .refine(
+        (value) => {
+          if (!value) return false;
+          const pattern = search?.validation?.zip?.pattern;
+          if (!pattern) return true;
+          return new RegExp(pattern).test(value);
+        },
+        {
+          message:
+            search?.validation?.zip?.invalidFormatError || "郵遞區號格式無效",
+        },
+      ),
+  });
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      country: undefined,
+      zipCode: undefined,
       model: undefined,
       capacities: undefined,
       color: undefined,
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
-  };
-
-  const { data: countryData, isLoading: isCountryLoading } = useQuery({
-    queryKey: ["locales"],
-    queryFn: async () => {
-      const response = await getLocales();
-      return response.data;
-    },
-    refetchOnWindowFocus: false,
-  });
-
-  const handleCountryChange = (value: string) => {
-    // 更新表單值
-    form.setValue("country", value);
-    form.setValue("model", "");
-
-    // 執行原有的 handleLanguageChange 邏輯
-    setLocalStorage(LOCAL_STORAGE.APPLE_LANG_TAG, value);
-    setLangTag(value);
-
-    // 如果需要觸發表單驗證，可以添加以下行
-    form.trigger("country");
+  const onSubmit = ({ capacities, color }: z.infer<typeof formSchema>) => {
+    const zipCode = form.getValues().zipCode;
+    const deviceId = model?.part_numbers.find(
+      (item) => item.color === color && item.capacity === capacities,
+    )?.part_number;
+    navigate({
+      to: "/app/models",
+      search: {
+        params: {
+          "parts.0": deviceId,
+          location: zipCode,
+          cppart: "UNLOCKED/WW",
+        },
+      },
+    });
   };
 
   const { data: modelData } = useQuery({
@@ -126,153 +129,128 @@ const App = () => {
     form.trigger("color");
   };
 
+  if (!search) return <div>Loading...</div>;
+
   return (
-    <Card className="h-[550px] w-[400px]">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <CardHeader>
-            <CardTitle>iPhone stock checker</CardTitle>
-            <CardDescription>
-              A tool to search and find your desired iPhone model
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-2">
-            <FormField
-              control={form.control}
-              name="country"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Country</FormLabel>
-                  <Select
-                    value={field.value}
-                    onValueChange={handleCountryChange}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a country" />
-                      </SelectTrigger>
-                    </FormControl>
-                    {countryData ? (
-                      <SelectContent>
-                        {countryData.map(({ id, country, lang_tag }) => (
-                          <SelectItem key={id} value={lang_tag || "lang-tag"}>
-                            {country}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    ) : (
-                      <SelectContent
-                        className={isCountryLoading ? "h-[300px] w-full" : ""}
-                      >
-                        <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
-                          <Spinner className="h-10 w-10 text-primary/50" />
-                        </div>
-                      </SelectContent>
-                    )}
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            ></FormField>
-            <FormField
-              control={form.control}
-              name="model"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Model</FormLabel>
-                  <Select
-                    disabled={!form.getValues().country}
-                    value={field.value}
-                    onValueChange={handleModelChange}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a model" />
-                      </SelectTrigger>
-                    </FormControl>
-                    {modelData ? (
-                      <SelectContent>
-                        {modelData.map(({ name, id }) => (
-                          <SelectItem key={id} value={id}>
-                            {name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    ) : (
-                      <SelectContent className="h-[300px]">
-                        <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
-                          <Spinner className="h-10 w-10 text-primary/50" />
-                        </div>
-                      </SelectContent>
-                    )}
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            ></FormField>
-            <FormField
-              control={form.control}
-              name="capacities"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Capacities</FormLabel>
-                  <Select
-                    disabled={!form.getValues().model}
-                    value={field.value}
-                    onValueChange={handleCapacitiesChange}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a capacities" />
-                      </SelectTrigger>
-                    </FormControl>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        {/* <CardHeader></CardHeader> */}
+        <CardContent className="flex flex-col gap-2">
+          <FormField
+            control={form.control}
+            name="model"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Model</FormLabel>
+                <Select
+                  disabled={!langTag}
+                  value={field.value}
+                  onValueChange={handleModelChange}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a model" />
+                    </SelectTrigger>
+                  </FormControl>
+                  {modelData ? (
                     <SelectContent>
-                      {capacities.map((capacity) => (
-                        <SelectItem key={capacity} value={capacity}>
-                          {capacity}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-              )}
-            ></FormField>
-            <FormField
-              control={form.control}
-              name="color"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Color</FormLabel>
-                  <Select
-                    disabled={!form.getValues().model}
-                    value={field.value}
-                    onValueChange={handleColorChange}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a color" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {colors.map(({ code, name }) => (
-                        <SelectItem key={code} value={code}>
+                      {modelData.map(({ name, id }) => (
+                        <SelectItem key={id} value={id}>
                           {name}
                         </SelectItem>
                       ))}
                     </SelectContent>
-                  </Select>
-                </FormItem>
-              )}
-            ></FormField>
-          </CardContent>
-          <CardFooter>
-            <Button type="submit" className="w-full">
-              Search
-            </Button>
-          </CardFooter>
-        </form>
-      </Form>
-    </Card>
+                  ) : (
+                    <SelectContent className="h-[300px]">
+                      <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
+                        <Spinner className="h-10 w-10 text-primary/50" />
+                      </div>
+                    </SelectContent>
+                  )}
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          ></FormField>
+          <FormField
+            control={form.control}
+            name="capacities"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Capacities</FormLabel>
+                <Select
+                  disabled={!form.getValues().model}
+                  value={field.value}
+                  onValueChange={handleCapacitiesChange}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a capacities" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {capacities.map((capacity) => (
+                      <SelectItem key={capacity} value={capacity}>
+                        {capacity}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          ></FormField>
+          <FormField
+            control={form.control}
+            name="color"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Color</FormLabel>
+                <Select
+                  disabled={!form.getValues().model}
+                  value={field.value}
+                  onValueChange={handleColorChange}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a color" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {colors.map(({ code, name }) => (
+                      <SelectItem key={code} value={code}>
+                        {name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          ></FormField>
+          <FormField
+            control={form.control}
+            name="zipCode"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{search?.zipMessage || "Postal code"}</FormLabel>
+                <Input
+                  {...field}
+                  placeholder={search?.zipMessage || "Please enter postal code"}
+                  onChange={(e) => field.onChange(e.target.value)}
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          ></FormField>
+        </CardContent>
+        <CardFooter className="flex justify-end">
+          <Button type="submit" className="w-[100px]">
+            Search
+          </Button>
+        </CardFooter>
+      </form>
+    </Form>
   );
 };
 

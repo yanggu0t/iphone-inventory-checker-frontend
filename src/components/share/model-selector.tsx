@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/select";
 import { Spinner } from "../ui/spinner";
 import { cn } from "@/utils/tools";
-import { useEffect } from "react";
 
 interface IProps {
   className?: string;

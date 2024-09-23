@@ -19,6 +19,13 @@ export default defineConfig({
           return path.replace(/^\/api/, "");
         },
       },
+      apple: {
+        target: "https://www.apple.com/",
+        changeOrigin: true,
+        rewrite: (path) => {
+          return path.replace(/^\/apple/, "");
+        },
+      },
     },
   },
 });

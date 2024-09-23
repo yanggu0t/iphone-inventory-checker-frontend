@@ -25,3 +25,24 @@ export type Locale = {
   id: string;
   lang_tag: string;
 };
+
+export type ConfigResponse = BackendResponse<Config>;
+export type Config = {
+  search: {
+    countryCode: string;
+    loadingVoText: string;
+    modelMessage: string;
+    pickupEnabled: true;
+    pickupURL: string;
+    searchMessage: string;
+    suggestionsURL: string;
+    validation: {
+      zip: {
+        invalidFormatError: string;
+        pattern: string;
+        requiredError: string;
+      };
+    };
+    zipMessage: string;
+  };
+};
