@@ -1,0 +1,20 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://apple-api.yanggu0t.in/:path*"
+    },
+    {
+      "source": "/apple/:path*",
+      "destination": "https://www.apple.com/:path*"
+    },
+    {
+      "source": "/apple-cn/:path*",
+      "destination": "https://www.apple.com.cn/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

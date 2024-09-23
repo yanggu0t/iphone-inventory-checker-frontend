@@ -1,20 +1,20 @@
-import { Model } from "@/service/types/apple";
+import { Config, FormSchema, Model } from "@/service/types/apple";
 import { ImmerStateCreator } from "..";
 
 export interface AppleState {
+  config: Config | null;
   langTag: string | null;
-  model: Model | null;
-  color: string | null;
-  capacities: string | null;
-  modelToken: string | null;
+  isCollapsed: boolean;
+  formData: FormSchema | null;
+  isResetForm: boolean;
 }
 
 export interface AppleActions {
+  setConfig: (config: Config | null) => void;
   setLangTag: (lang: string | null) => void;
-  setModel: (model: Model | null) => void;
-  setColor: (color: string | null) => void;
-  setCapacities: (capacities: string | null) => void;
-  setModelToken: (token: string | null) => void;
+  setIsCollapsed(bool: boolean): void;
+  setFormData: (data: FormSchema | null) => void;
+  setIsResetForm(bool: boolean): void;
 }
 
 export interface AppleSlice {
@@ -22,19 +22,19 @@ export interface AppleSlice {
 }
 
 const initialState: AppleState = {
+  config: null,
   langTag: null,
-  model: null,
-  color: null,
-  capacities: null,
-  modelToken: null,
+  isCollapsed: false,
+  formData: null,
+  isResetForm: false,
 };
 
 export const createAppleSlice: ImmerStateCreator<AppleSlice> = (set) => ({
   apple: {
     ...initialState,
-    setModel: (model) => {
+    setConfig: (config) => {
       set((state) => {
-        state.apple.model = model;
+        state.apple.config = config;
       });
     },
     setLangTag: (lang) => {
@@ -42,19 +42,19 @@ export const createAppleSlice: ImmerStateCreator<AppleSlice> = (set) => ({
         state.apple.langTag = lang;
       });
     },
-    setColor: (color) => {
+    setIsCollapsed: (bool) => {
       set((state) => {
-        state.apple.color = color;
+        state.apple.isCollapsed = bool;
       });
     },
-    setCapacities: (capacities) => {
+    setFormData: (data) => {
       set((state) => {
-        state.apple.capacities = capacities;
+        state.apple.formData = data;
       });
     },
-    setModelToken: (token) => {
+    setIsResetForm: (bool) => {
       set((state) => {
-        state.apple.modelToken = token;
+        state.apple.isResetForm = bool;
       });
     },
   },

@@ -6,19 +6,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getLocales } from "@/service/api/apple";
-import { LOCAL_STORAGE } from "@/utils/enums";
-import { cn, setLocalStorage } from "@/utils/tools";
+import { cn } from "@/utils/tools";
 import { useQuery } from "@tanstack/react-query";
-import { useTranslation } from "react-i18next";
 import { useStore } from "@/stores";
 import { Spinner } from "../ui/spinner";
+import { Card } from "../ui/card";
+import { Typography } from "../ui/typography";
 
 interface IProps {
   className?: string;
+  setLocalLangTag: (value: string) => void;
 }
 
-const CountrySelector = ({ className }: IProps) => {
+const CountrySelector = ({ className, setLocalLangTag }: IProps) => {
   const setLangTag = useStore((state) => state.apple.setLangTag);
+  const setIsResetForm = useStore((state) => state.apple.setIsResetForm);
   const { data, isLoading } = useQuery({
     queryKey: ["locales"],
     queryFn: async () => {
@@ -29,30 +31,41 @@ const CountrySelector = ({ className }: IProps) => {
   });
 
   const handleLanguageChange = (lang: string) => {
-    setLocalStorage(LOCAL_STORAGE.APPLE_LANG_TAG, lang);
     setLangTag(lang);
+    setLocalLangTag(lang);
+    setIsResetForm(true);
   };
+
   return (
-    <Select onValueChange={handleLanguageChange}>
-      <SelectTrigger className={cn("w-[280px]", className)}>
-        <SelectValue placeholder="Select a country" />
-      </SelectTrigger>
-      {data ? (
-        <SelectContent>
-          {data.map(({ id, country, lang_tag }) => (
-            <SelectItem key={id} value={lang_tag || "lang-tag"}>
-              {country}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      ) : (
-        <SelectContent className={isLoading ? "h-[300px] w-full" : ""}>
-          <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
-            <Spinner className="h-10 w-10 text-primary/50" />
-          </div>
-        </SelectContent>
-      )}
-    </Select>
+    <Card className="grid min-h-[100px] min-w-[400px] place-content-center gap-4 px-4 py-8">
+      <Typography variant="inlineCode" className="text-center">
+        Please select the country you want to check inventory for.
+      </Typography>
+
+      <Select onValueChange={handleLanguageChange}>
+        <SelectTrigger className={cn("w-full", className)}>
+          <SelectValue placeholder="Select a country" />
+        </SelectTrigger>
+        {data ? (
+          <SelectContent>
+            {data.map(({ id, country, lang_tag }) => {
+              // if (lang_tag === "cn") return null;
+              return (
+                <SelectItem key={id} value={lang_tag || "lang-tag"}>
+                  {country}
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
+        ) : (
+          <SelectContent className={isLoading ? "h-[300px] w-full" : ""}>
+            <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
+              <Spinner className="h-10 w-10 text-primary/50" />
+            </div>
+          </SelectContent>
+        )}
+      </Select>
+    </Card>
   );
 };
 

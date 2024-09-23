@@ -7,13 +7,30 @@ const service = axios.create({
 });
 
 service.interceptors.request.use((config) => {
-  config.headers["Accept-Language"] =
-    getLocalStorage(LOCAL_STORAGE.APPLE_LANG_TAG) || "";
+  const lang = getLocalStorage(LOCAL_STORAGE.APPLE_LANG_TAG) as string;
+  const url = config.url;
+  if (url && url.includes("/api")) {
+    config.headers["Accept-Language"] = lang;
+  }
+  if (url && url.startsWith("/apple") && lang === "cn") {
+    config.url = url.replace(/^\/apple/, "/apple-cn");
+  }
   return config;
 });
 
 service.interceptors.response.use(
   (response) => {
+    const url = response.config.url;
+    const apple_urls = ["apple", "address-lookup"];
+
+    if (url && apple_urls.some((item) => url.includes(item))) {
+      return Promise.resolve({
+        data: response.data["body"],
+        msg: response.statusText,
+        status: "success",
+      });
+    }
+
     return response.data;
   },
   (error) => {
