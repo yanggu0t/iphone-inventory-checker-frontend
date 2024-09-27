@@ -7,13 +7,26 @@ const service = axios.create({
 });
 
 service.interceptors.request.use((config) => {
-  config.headers["Accept-Language"] =
-    getLocalStorage(LOCAL_STORAGE.APPLE_LANG_TAG) || "";
+  const lang = getLocalStorage(LOCAL_STORAGE.APPLE_LANG_TAG) as string;
+  const url = config.url;
+  if (url && url.includes("/api")) {
+    config.headers["Accept-Language"] = lang;
+  }
   return config;
 });
 
 service.interceptors.response.use(
   (response) => {
+    const url = response.headers["access-control-allow-origin"];
+
+    if (url === "https://www.apple.com") {
+      return Promise.resolve({
+        data: response.data["body"],
+        msg: response.statusText,
+        status: "success",
+      });
+    }
+
     return response.data;
   },
   (error) => {

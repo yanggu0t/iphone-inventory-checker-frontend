@@ -1,13 +1,11 @@
-import { getLocalStorage } from "@/utils/tools";
 import service from "../middleware";
 import {
   ModelsResponse,
   LocalesResponse,
   ConfigResponse,
+  currentModelStockRequest,
+  modelStockResponse,
 } from "../types/apple";
-import { LOCAL_STORAGE } from "@/utils/enums";
-
-const lang = getLocalStorage(LOCAL_STORAGE.APPLE_LANG_TAG) as string;
 
 export const getLocales = (): Promise<LocalesResponse> => {
   return service.get("/api/locales");
@@ -21,14 +19,10 @@ export const getConfig = (): Promise<ConfigResponse> => {
   return service.get("/api/config");
 };
 
-// export const getCurrentModelStock = (request): Promise<any> => {
-//   return service.get(`${request.path}`, { request.params });
-// };
-
-// export const getCurrentModelRecommendations = (
-//   request,
-// ): Promise<any> => {
-//   return service.get(`${request.path}`, {
-//     request.params,
-//   });
-// };
+export const getModelsStock = (
+  request: currentModelStockRequest,
+): Promise<modelStockResponse> => {
+  return service.get(`/apple${request.path}`, {
+    params: request.params,
+  });
+};

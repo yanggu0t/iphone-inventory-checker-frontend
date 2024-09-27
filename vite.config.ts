@@ -15,16 +15,12 @@ export default defineConfig({
       "/api": {
         target: "https://apple-api.yanggu0t.in/",
         changeOrigin: true,
-        rewrite: (path) => {
-          return path.replace(/^\/api/, "");
-        },
+        rewrite: (path) => path.replace(/^\/api/, ""),
       },
-      apple: {
-        target: "https://www.apple.com/",
+      "/apple": {
+        target: "https://www.apple.com",
         changeOrigin: true,
-        rewrite: (path) => {
-          return path.replace(/^\/apple/, "");
-        },
+        rewrite: (path) => path.replace(/^\/apple/, ""),
       },
     },
   },

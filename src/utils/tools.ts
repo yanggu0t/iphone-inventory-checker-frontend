@@ -1,3 +1,4 @@
+import { FormatModelStock, modelStock } from "@/service/types/apple";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -42,3 +43,29 @@ export const removeLocalStorage = (key?: string) => {
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export const formatModelStock = (content: modelStock) => {
+  const firstStore = content.pickupMessage.stores[0];
+  const models: FormatModelStock[] = [];
+
+  Object.entries(firstStore.partsAvailability).forEach(
+    ([partNumber, partInfo]) => {
+      const modelStock: FormatModelStock = {
+        partNumber,
+        productName: partInfo.messageTypes.regular.storePickupProductTitle,
+        stores: content.pickupMessage.stores.map((store) => ({
+          storeName: store.storeName,
+          storeNumber: store.storeNumber,
+          city: store.city,
+          available:
+            store.partsAvailability[partNumber].pickupDisplay !== "unavailable",
+          pickupSearchQuote:
+            store.partsAvailability[partNumber].pickupSearchQuote,
+        })),
+      };
+      models.push(modelStock);
+    },
+  );
+
+  return models;
+};

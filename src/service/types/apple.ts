@@ -1,6 +1,6 @@
-import { BackendResponse } from "@/service/api";
+import { BasicResponse } from "@/service/api";
 
-export type ModelsResponse = BackendResponse<Models>;
+export type ModelsResponse = BasicResponse<Models>;
 export type Models = Model[];
 export type Model = {
   id: string;
@@ -17,16 +17,17 @@ export type PartNumber = {
 export type Color = {
   code: string;
   name: string;
+  image: string;
 };
 
-export type LocalesResponse = BackendResponse<Locale[]>;
+export type LocalesResponse = BasicResponse<Locale[]>;
 export type Locale = {
   country: string;
   id: string;
   lang_tag: string;
 };
 
-export type ConfigResponse = BackendResponse<Config>;
+export type ConfigResponse = BasicResponse<Config>;
 export type Config = {
   search: {
     countryCode: string;
@@ -46,3 +47,253 @@ export type Config = {
     zipMessage: string;
   };
 };
+
+export type currentModelStockRequest = {
+  path: string;
+  params: currentModelStockParams;
+};
+
+export type currentModelStockParams = {
+  "parts.0": string;
+  location: string;
+  cppart: string;
+};
+
+export type modelStockResponse = BasicResponse<{
+  content: modelStock;
+}>;
+export type modelStock = {
+  deliveryMessage: deliveryMessage;
+  pickupMessage: pickupMessage;
+};
+export type deliveryMessage = {
+  accessibilityDeliveryOptions: string;
+  availableOptionsText: string;
+  contentloaded: string;
+  dudeCookieSet: boolean;
+  dudeLocated: boolean;
+  geoEnabled: boolean;
+  geoLocated: boolean;
+  locationCookieValueFoundForThisCountry: boolean;
+  processing: string;
+};
+export type pickupMessage = {
+  availability: {
+    isComingSoon: boolean;
+  };
+  filteredTopStore: boolean;
+  legendLabelText: string;
+  little: boolean;
+  location: string;
+  notAvailableNearOneStore: string;
+  notAvailableNearby: string;
+  overlayInitiatedFromWarmStart: boolean;
+  storesCount: string;
+  viewDetailsText: string;
+  viewMoreHoursLinkText: string;
+  viewMoreHoursVoText: string;
+  warmDudeWithAPU: boolean;
+  stores: Store[];
+};
+
+export type Store = {
+  storeEmail: string;
+  storeName: string;
+  reservationUrl: string;
+  makeReservationUrl: string;
+  storeImageUrl: string;
+  country: string;
+  city: string;
+  storeNumber: string;
+  partsAvailability: {
+    [partNumber: string]: {
+      storePickEligible: boolean;
+      pickupSearchQuote: string;
+      partNumber: string;
+      purchaseOption: string;
+      ctoOptions: string;
+      pickupDisplay: string;
+      pickupType: string;
+      messageTypes: {
+        regular: {
+          storeSearchEnabled: boolean;
+          storePickupLabel: string;
+          storeSelectionEnabled: boolean;
+          storePickupQuote: string;
+          storePickupQuote2_0: string;
+          storePickupLinkText: string;
+          storePickupProductTitle: string;
+        };
+      };
+      buyability: {
+        isBuyable: boolean;
+        reason: string;
+        commitCodeId: number;
+        inventory: number;
+      };
+    };
+  };
+  phoneNumber: string;
+  pickupTypeAvailabilityText: string;
+  address: {
+    address: string;
+    address3: string;
+    address2: string;
+    postalCode: string;
+  };
+  hoursUrl: string;
+  storeHours: {
+    storeHoursText: string;
+    bopisPickupDays: string;
+    bopisPickupHours: string;
+    hours: Array<{
+      storeTimings: string;
+      storeDays: string;
+    }>;
+  };
+  storelatitude: number;
+  storelongitude: number;
+  storedistance: number;
+  storeDistanceWithUnit: string;
+  storeDistanceVoText: string;
+  retailStore: {
+    storeNumber: string;
+    storeUniqueId: string;
+    name: string;
+    storeTypeKey: string;
+    storeSubTypeKey: string;
+    storeType: string;
+    phoneNumber: string;
+    email: string;
+    carrierCode: string | null;
+    locationType: string | null;
+    latitude: number;
+    longitude: number;
+    address: {
+      city: string;
+      companyName: string;
+      countryCode: string;
+      county: string | null;
+      district: string | null;
+      geoCode: string | null;
+      label: string | null;
+      languageCode: string;
+      mailStop: string | null;
+      postalCode: string;
+      primaryAddress: boolean;
+      province: string | null;
+      state: string | null;
+      street: string;
+      street2: string;
+      street3: string | null;
+      suburb: string | null;
+      type: string;
+      addrSourceType: string | null;
+      outsideCityFlag: string | null;
+      daytimePhoneAreaCode: string | null;
+      eveningPhoneAreaCode: string | null;
+      daytimePhone: string;
+      fullPhoneNumber: string | null;
+      eveningPhone: string | null;
+      emailAddress: string | null;
+      firstName: string | null;
+      lastName: string | null;
+      suffix: string | null;
+      lastNamePhonetic: string | null;
+      firstNamePhonetic: string | null;
+      title: string | null;
+      bundlePaymentAddress: boolean;
+      businessAddress: boolean;
+      uuid: string;
+      mobilePhone: string | null;
+      mobilePhoneAreaCode: string | null;
+      cityStateZip: string | null;
+      daytimePhoneSelected: boolean;
+      middleName: string | null;
+      residenceStatus: string | null;
+      moveInDate: string | null;
+      subscriberId: string | null;
+      locationType: string | null;
+      carrierCode: string | null;
+      addressCode: string | null;
+      metadata: Record<string, unknown>;
+      verificationState: string;
+      expiration: string | null;
+      markForDeletion: boolean;
+      correctionResult: string | null;
+      fullEveningPhone: string | null;
+      fullDaytimePhone: string;
+      twoLineAddress: string;
+      addressVerified: boolean;
+    };
+    urlKey: string | null;
+    directionsUrl: string | null;
+    storeImageUrl: string;
+    makeReservationUrl: string;
+    hoursAndInfoUrl: string;
+    storeHours: Array<{
+      storeDays: string;
+      voStoreDays: string | null;
+      storeTimings: string;
+    }>;
+    storeHolidays: Array<unknown>;
+    secureStoreImageUrl: string;
+    distance: number;
+    distanceUnit: string;
+    distanceWithUnit: string;
+    timezone: string;
+    storeIsActive: boolean;
+    lastUpdated: number;
+    lastFetched: number;
+    dateStamp: string;
+    distanceSeparator: string;
+    nextAvailableDate: string | null;
+    storeHolidayLookAheadWindow: number;
+    driveDistanceWithUnit: string | null;
+    driveDistanceInMeters: number | null;
+    dynamicAttributes: Record<string, unknown>;
+    storePickupMethodByType: {
+      INSTORE: {
+        type: string;
+        typeDirection: {
+          directionByLocale: string | null;
+        };
+        typeCoordinate: {
+          lat: number;
+          lon: number;
+        };
+        typeMeetupLocation: {
+          meetingLocationByLocale: string | null;
+        };
+        services: string[];
+      };
+    };
+    storeTimings: string | null;
+    availableNow: boolean;
+  };
+  storelistnumber: number;
+  storeListNumber: number;
+  pickupOptionsDetails: {
+    whatToExpectAtPickup: string;
+    comparePickupOptionsLink: string;
+    pickupOptions: Array<{
+      pickupOptionTitle: string;
+      pickupOptionDescription: string;
+      index: number;
+    }>;
+  };
+  rank: number;
+};
+export interface StoreStock {
+  storeName: string;
+  storeNumber: string;
+  city: string;
+  available: boolean;
+  pickupSearchQuote: string;
+}
+
+export interface FormatModelStock {
+  partNumber: string;
+  productName: string;
+  stores: StoreStock[];
+}

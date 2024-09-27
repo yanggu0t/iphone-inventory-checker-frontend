@@ -3,15 +3,15 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { cn, getLocalStorage } from "@/utils/tools";
+import { cn } from "@/utils/tools";
 import { useStore } from "@/stores";
 import AnimatedBackground from "@/components/core/animated-background";
 import {
-  MapPin,
   SlidersHorizontal,
   Smartphone,
   Menu,
   ChevronLeft,
+  TabletSmartphone,
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
@@ -21,19 +21,30 @@ import { CountrySelector } from "@/components/share";
 import { Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { getConfig } from "@/service/api/apple";
+import { Tooltip } from "@radix-ui/react-tooltip";
+import { TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { Spinner } from "@/components/ui/spinner";
+import { useState } from "react";
+import React from "react";
+import { Config } from "@/service/types/apple";
+import Loading from "@/components/share/loading";
+import Search from "./components/search";
 
 const AppLayout = () => {
-  const langTag = getLocalStorage(
+  const [langTag, setLangTag] = useLocalStorage<string | null>(
     LOCAL_STORAGE.APPLE_LANG_TAG,
-  ) as unknown as string;
+    null,
+  );
   const navigate = useNavigate();
   const pathname = useLocation().pathname;
   const isAppRoot = pathname === "/app" || pathname === "/app/";
   const isCollapsed = useStore((state) => state.apple.isCollapsed);
   const setIsCollapsed = useStore((state) => state.apple.setIsCollapsed);
   const setConfig = useStore((state) => state.apple.setConfig);
+  const [type, setType] = useState<string>("multiple-models");
 
-  const config = useQuery({
+  const { data, isFetching } = useQuery({
     queryKey: ["config"],
     queryFn: async () => {
       const response = await getConfig();
@@ -44,7 +55,8 @@ const AppLayout = () => {
     refetchOnWindowFocus: false,
   });
 
-  if (!langTag) return <CountrySelector />;
+  if (!langTag) return <CountrySelector setLocalLangTag={setLangTag} />;
+  if (isFetching) return <Loading />;
 
   return (
     <ResizablePanelGroup className="rounded-lg border" direction="horizontal">
@@ -93,6 +105,7 @@ const AppLayout = () => {
                 key={item.key}
                 data-id={`card-${item.key}`}
                 className="w-full cursor-pointer"
+                onClick={() => setType(item.key)}
               >
                 <div className="flex w-full select-none flex-col p-4">
                   <h3 className="flex items-center gap-2 text-base font-medium text-zinc-800 dark:text-zinc-50">
@@ -109,12 +122,25 @@ const AppLayout = () => {
       <ResizablePanel minSize={40}>
         <div className="flex h-[52px] items-center justify-between p-4">
           <Typography variant="h5">iphone-stock-checker</Typography>
-          <Typography variant="inlineCode">{langTag}</Typography>
+          <Tooltip>
+            <TooltipTrigger>
+              <Typography
+                className="cursor-pointer"
+                variant="inlineCode"
+                onClick={() => setLangTag(null)}
+              >
+                {langTag}
+              </Typography>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Change Language</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
         <Separator />
-        <Outlet />
+        {data && <Form config={data} type={type} />}
       </ResizablePanel>
-      {true && (
+      {!isAppRoot && (
         <>
           <ResizableHandle withHandle />
           <ResizablePanel minSize={25}>
@@ -122,7 +148,7 @@ const AppLayout = () => {
               Live console
             </Typography>
             <Separator />
-            <p>live</p>
+            <Outlet />
           </ResizablePanel>
         </>
       )}
@@ -135,17 +161,33 @@ export default AppLayout;
 interface SidebarItem {
   key: string;
   title: string;
-  path: string;
   icon: LucideIcon;
 }
 
 const sidebar: SidebarItem[] = [
-  { key: "deviceId", title: "Search By Model", path: "", icon: Smartphone },
-  { key: "zipCode", title: "Search By Locale", path: "", icon: MapPin },
+  {
+    key: "search",
+    title: "Search",
+    icon: Smartphone,
+  },
   {
     key: "preferences",
     title: "Preferences",
-    path: "",
     icon: SlidersHorizontal,
   },
 ];
+
+interface IProps {
+  config: Config;
+  type: string;
+}
+
+const Form: React.FC<IProps> = ({ config, type }) => {
+  switch (type) {
+    default:
+    case "search":
+      return <Search config={config} />;
+    case "preferences":
+      return <div>Preferences Form (Not implemented yet)</div>;
+  }
+};

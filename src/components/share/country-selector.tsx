@@ -6,8 +6,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getLocales } from "@/service/api/apple";
-import { LOCAL_STORAGE } from "@/utils/enums";
-import { cn, setLocalStorage } from "@/utils/tools";
+import { cn } from "@/utils/tools";
 import { useQuery } from "@tanstack/react-query";
 import { useStore } from "@/stores";
 import { Spinner } from "../ui/spinner";
@@ -16,9 +15,10 @@ import { Typography } from "../ui/typography";
 
 interface IProps {
   className?: string;
+  setLocalLangTag: (value: string) => void;
 }
 
-const CountrySelector = ({ className }: IProps) => {
+const CountrySelector = ({ className, setLocalLangTag }: IProps) => {
   const setLangTag = useStore((state) => state.apple.setLangTag);
   const { data, isLoading } = useQuery({
     queryKey: ["locales"],
@@ -31,8 +31,9 @@ const CountrySelector = ({ className }: IProps) => {
 
   const handleLanguageChange = (lang: string) => {
     setLangTag(lang);
-    setLocalStorage(LOCAL_STORAGE.APPLE_LANG_TAG, lang);
+    setLocalLangTag(lang);
   };
+
   return (
     <Card className="grid min-h-[100px] min-w-[400px] place-content-center gap-4 px-4 py-8">
       <Typography variant="inlineCode" className="text-center">
