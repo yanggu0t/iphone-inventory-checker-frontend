@@ -25,7 +25,7 @@ import { Tooltip } from "@radix-ui/react-tooltip";
 import { TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { Spinner } from "@/components/ui/spinner";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import React from "react";
 import { Config } from "@/service/types/apple";
 import Loading from "@/components/share/loading";
@@ -54,6 +54,12 @@ const AppLayout = () => {
     enabled: !!langTag,
     refetchOnWindowFocus: false,
   });
+
+  useEffect(() => {
+    if (isAppRoot) {
+      navigate({ to: "/app/search" });
+    }
+  }, [isAppRoot, navigate]);
 
   if (!langTag) return <CountrySelector setLocalLangTag={setLangTag} />;
   if (isFetching) return <Loading />;

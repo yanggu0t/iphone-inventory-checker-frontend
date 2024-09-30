@@ -9,7 +9,7 @@ import {
   useState,
 } from "react";
 import { motion, Transition, useMotionValue } from "framer-motion";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/utils/tools";
 
 type CarouselContextType = {
@@ -106,8 +106,8 @@ function Carousel({
       onIndexChange={handleIndexChange}
       disableDrag={disableDrag}
     >
-      <div className={cn("group/hover relative h-full", className)}>
-        <div className="h-full overflow-hidden">{children}</div>
+      <div className={cn("group/hover relative", className)}>
+        <div className="overflow-hidden">{children}</div>
       </div>
     </CarouselProvider>
   );
@@ -129,7 +129,7 @@ function CarouselNavigation({
   return (
     <div
       className={cn(
-        "pointer-events-none absolute left-1/2 top-[-12.5%] flex h-[125%] -translate-x-1/2 flex-col justify-between py-2",
+        "pointer-events-none absolute left-[-12.5%] top-1/2 flex w-[125%] -translate-y-1/2 justify-between px-2",
         className,
       )}
     >
@@ -152,7 +152,10 @@ function CarouselNavigation({
           }
         }}
       >
-        <ChevronUp className="stroke-zinc-600 dark:stroke-zinc-50" size={16} />
+        <ChevronLeft
+          className="stroke-zinc-600 dark:stroke-zinc-50"
+          size={16}
+        />
       </button>
       <button
         type="button"
@@ -173,7 +176,7 @@ function CarouselNavigation({
           }
         }}
       >
-        <ChevronDown
+        <ChevronRight
           className="stroke-zinc-600 dark:stroke-zinc-50"
           size={16}
         />
@@ -196,11 +199,11 @@ function CarouselIndicator({
   return (
     <div
       className={cn(
-        "absolute right-0 z-10 flex h-full items-center justify-center",
+        "absolute bottom-0 z-10 flex w-full items-center justify-center",
         className,
       )}
     >
-      <div className="flex flex-col space-y-2">
+      <div className="flex space-x-2">
         {Array.from({ length: itemsCount }, (_, i) => (
           <button
             key={i}
@@ -226,15 +229,40 @@ type CarouselContentProps = {
   className?: string;
   transition?: Transition;
 };
+
 function CarouselContent({
   children,
   className,
   transition,
 }: CarouselContentProps) {
   const { index, setIndex, setItemsCount, disableDrag } = useCarousel();
-  const dragY = useMotionValue(0);
+  const [visibleItemsCount, setVisibleItemsCount] = useState(1);
+  const dragX = useMotionValue(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const itemsLength = Children.count(children);
+
+  useEffect(() => {
+    if (!containerRef.current) {
+      return;
+    }
+
+    const options = {
+      root: containerRef.current,
+      threshold: 0.5,
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      const visibleCount = entries.filter(
+        (entry) => entry.isIntersecting,
+      ).length;
+      setVisibleItemsCount(visibleCount);
+    }, options);
+
+    const childNodes = containerRef.current.children;
+    Array.from(childNodes).forEach((child) => observer.observe(child));
+
+    return () => observer.disconnect();
+  }, [children, setItemsCount]);
 
   useEffect(() => {
     if (!itemsLength) {
@@ -245,32 +273,32 @@ function CarouselContent({
   }, [itemsLength, setItemsCount]);
 
   const onDragEnd = () => {
-    const y = dragY.get();
+    const x = dragX.get();
 
-    if (y <= -10 && index < itemsLength - 1) {
+    if (x <= -10 && index < itemsLength - 1) {
       setIndex(index + 1);
-    } else if (y >= 10 && index > 0) {
+    } else if (x >= 10 && index > 0) {
       setIndex(index - 1);
     }
   };
 
   return (
     <motion.div
-      drag={disableDrag ? false : "y"}
+      drag={disableDrag ? false : "x"}
       dragConstraints={
         disableDrag
           ? undefined
           : {
-              top: 0,
-              bottom: 0,
+              left: 0,
+              right: 0,
             }
       }
       dragMomentum={disableDrag ? undefined : false}
       style={{
-        y: disableDrag ? undefined : dragY,
+        x: disableDrag ? undefined : dragX,
       }}
       animate={{
-        translateY: `-${index * 100}%`,
+        translateX: `-${index * (100 / visibleItemsCount)}%`,
       }}
       onDragEnd={disableDrag ? undefined : onDragEnd}
       transition={
@@ -282,7 +310,7 @@ function CarouselContent({
         }
       }
       className={cn(
-        "flex h-full flex-col",
+        "flex items-center",
         !disableDrag && "cursor-grab active:cursor-grabbing",
         className,
       )}
@@ -301,7 +329,10 @@ type CarouselItemProps = {
 function CarouselItem({ children, className }: CarouselItemProps) {
   return (
     <motion.div
-      className={cn("h-full w-full shrink-0 grow-0 overflow-hidden", className)}
+      className={cn(
+        "w-full min-w-0 shrink-0 grow-0 overflow-hidden",
+        className,
+      )}
     >
       {children}
     </motion.div>

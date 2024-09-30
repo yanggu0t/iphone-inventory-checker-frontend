@@ -297,3 +297,10 @@ export interface FormatModelStock {
   productName: string;
   stores: StoreStock[];
 }
+
+export type FormSchema = {
+  model: Model;
+  storage: string;
+  color: string;
+  zipCode: string;
+};

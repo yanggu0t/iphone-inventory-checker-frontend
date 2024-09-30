@@ -4,9 +4,7 @@ import {
   createRouter,
 } from "@tanstack/react-router";
 import { MainLayout, AppLayout } from "../layouts";
-import { App, Home, NotFound } from "../pages";
-import Models from "@/pages/Models";
-import Locales from "@/pages/Locales";
+import { Models, Search, Home, NotFound } from "../pages";
 
 const rootRoute = createRootRoute({
   component: MainLayout,
@@ -18,22 +16,22 @@ const appRoute = createRoute({
   component: AppLayout,
 });
 
-const appIndexRoute = createRoute({
+const searchRoute = createRoute({
   getParentRoute: () => appRoute,
-  path: "/",
-  component: App,
+  path: "/search",
+  component: Search,
+});
+
+const preferenceRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/preference",
+  component: Search,
 });
 
 const modelsRoute = createRoute({
   getParentRoute: () => appRoute,
   path: "/models",
   component: Models,
-});
-
-const localesRoute = createRoute({
-  getParentRoute: () => appRoute,
-  path: "/locales",
-  component: Locales,
 });
 
 const homeRoute = createRoute({
@@ -44,7 +42,7 @@ const homeRoute = createRoute({
 
 const routeTree = rootRoute.addChildren([
   appRoute,
-  homeRoute.addChildren([appIndexRoute, modelsRoute, localesRoute]),
+  homeRoute.addChildren([searchRoute, modelsRoute, preferenceRoute]),
 ]);
 
 export const router = createRouter({
