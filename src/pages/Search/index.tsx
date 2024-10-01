@@ -1,10 +1,12 @@
+import Loading from "@/components/share/loading";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Typography } from "@/components/ui/typography";
 import { getModelsStock } from "@/service/api/apple";
 import { FormSchema } from "@/service/types/apple";
 import { useStore } from "@/stores";
 import { formatModelStock } from "@/utils/tools";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
 
 const Search = () => {
   const formValues = useStore((state) => state.apple.formData) ?? {};
@@ -22,6 +24,7 @@ const Search = () => {
       const response = await getModelsStock({
         path: search.pickupURL,
         params: {
+          "mts.0": "compact",
           "parts.0": currentModel?.part_number || "",
           location: zipCode,
           cppart: "UNLOCKED/WW",
@@ -35,7 +38,10 @@ const Search = () => {
   });
 
   const formatModel =
-    data && "content" in data ? formatModelStock(data.content) : null;
+    data && "content" in data ? formatModelStock(data.content)[0] : null;
+
+  const { pickup, delivery, productName } = formatModel ?? {};
+  const { image_url } = currentModel ?? {};
 
   if (!model || !storage || !color || !zipCode)
     return (
@@ -46,7 +52,37 @@ const Search = () => {
       </div>
     );
 
-  return <div>Search</div>;
+  if (!formatModel) return <Loading />;
+
+  return (
+    <div className="flex h-[calc(100%-52px)] flex-col overflow-auto p-3">
+      <div className="flex items-center gap-2">
+        <img
+          className="h-[90px] w-[85.2px] rounded-lg"
+          src={image_url}
+          alt={productName}
+        />
+        <Typography variant="h5">{productName}</Typography>
+      </div>
+      <RadioGroup>
+        {pickup?.stores.map((item) => {
+          return (
+            <div className="flex items-center space-x-1 space-y-0 rounded-lg border">
+              <RadioGroupItem
+                className="sr-only"
+                disabled={true}
+                value={item.storeNumber}
+                id={item.storeNumber}
+              />
+              <Label className="flex-grow p-4" htmlFor={item.storeNumber}>
+                {item.storeName}
+              </Label>
+            </div>
+          );
+        })}
+      </RadioGroup>
+    </div>
+  );
 };
 
 export default Search;

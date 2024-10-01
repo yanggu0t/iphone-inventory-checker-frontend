@@ -45,24 +45,21 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const formatModelStock = (content: modelStock) => {
-  const firstStore = content.pickupMessage.stores[0];
+  const pickupEntry = content.pickupMessage.stores[0];
+  const deliveryEntry = content.deliveryMessage;
   const models: FormatModelStock[] = [];
 
-  Object.entries(firstStore.partsAvailability).forEach(
+  Object.entries(pickupEntry.partsAvailability).forEach(
     ([partNumber, partInfo]) => {
+      const compactInfo =
+        deliveryEntry[partNumber] && deliveryEntry[partNumber].compact;
       const modelStock: FormatModelStock = {
         partNumber,
-        productName: partInfo.messageTypes.regular.storePickupProductTitle,
-        stores: content.pickupMessage.stores.map((store) => ({
-          storeName: store.storeName,
-          storeNumber: store.storeNumber,
-          city: store.city,
-          available:
-            store.partsAvailability[partNumber].pickupDisplay !== "unavailable",
-          pickupSearchQuote:
-            store.partsAvailability[partNumber].pickupSearchQuote,
-        })),
+        productName: partInfo.messageTypes.compact.storePickupProductTitle,
+        pickup: { stores: content.pickupMessage.stores },
+        delivery: { compact: compactInfo },
       };
+
       models.push(modelStock);
     },
   );

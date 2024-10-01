@@ -149,7 +149,7 @@ const AppLayout = () => {
       {!isAppRoot && (
         <>
           <ResizableHandle withHandle />
-          <ResizablePanel minSize={25}>
+          <ResizablePanel className="h-full" minSize={25}>
             <Typography variant="h5" className="flex h-[52px] items-center p-4">
               Live console
             </Typography>

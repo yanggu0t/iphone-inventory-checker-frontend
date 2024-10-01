@@ -13,6 +13,7 @@ export type PartNumber = {
   capacity: string;
   color: string;
   part_number: string;
+  image_url: string;
 };
 export type Color = {
   code: string;
@@ -54,6 +55,7 @@ export type currentModelStockRequest = {
 };
 
 export type currentModelStockParams = {
+  "mts.0": string;
   "parts.0": string;
   location: string;
   cppart: string;
@@ -67,15 +69,30 @@ export type modelStock = {
   pickupMessage: pickupMessage;
 };
 export type deliveryMessage = {
-  accessibilityDeliveryOptions: string;
-  availableOptionsText: string;
-  contentloaded: string;
-  dudeCookieSet: boolean;
-  dudeLocated: boolean;
-  geoEnabled: boolean;
-  geoLocated: boolean;
-  locationCookieValueFoundForThisCountry: boolean;
-  processing: string;
+  [partNumber: string]: {
+    compact: {
+      label: string;
+      quote: string;
+      address: {
+        postalCode: string;
+      };
+      showDeliveryOptionsLink: boolean;
+      messageType: string;
+      basePartNumber: string;
+      commitCodeId: string;
+      subHeader: string;
+      buyability: {
+        reason: string;
+        commitCode: string;
+        isBuyable: boolean;
+      };
+      idl: boolean;
+      defaultLocationEnabled: boolean;
+      inHomeSetup: boolean;
+      isBuyable: boolean;
+      isElectronic: boolean;
+    };
+  };
 };
 export type pickupMessage = {
   availability: {
@@ -115,12 +132,11 @@ export type Store = {
       pickupDisplay: string;
       pickupType: string;
       messageTypes: {
-        regular: {
+        compact: {
           storeSearchEnabled: boolean;
           storePickupLabel: string;
           storeSelectionEnabled: boolean;
           storePickupQuote: string;
-          storePickupQuote2_0: string;
           storePickupLinkText: string;
           storePickupProductTitle: string;
         };
@@ -284,19 +300,52 @@ export type Store = {
   };
   rank: number;
 };
-export interface StoreStock {
-  storeName: string;
-  storeNumber: string;
-  city: string;
-  available: boolean;
-  pickupSearchQuote: string;
-}
+// export interface StoreStock {
+//   storeName: string;
+//   storeNumber: string;
+//   city: string;
+//   available: boolean;
+//   pickupSearchQuote: string;
+// }
 
 export interface FormatModelStock {
   partNumber: string;
   productName: string;
-  stores: StoreStock[];
+  pickup: {
+    stores: Store[];
+  };
+  delivery: {
+    compact: {
+      label: string;
+      quote: string;
+      address: {
+        postalCode: string;
+      };
+      showDeliveryOptionsLink: boolean;
+      messageType: string;
+      basePartNumber: string;
+      commitCodeId: string;
+      subHeader: string;
+      buyability: {
+        reason: string;
+        commitCode: string;
+        isBuyable: boolean;
+      };
+      idl: boolean;
+      defaultLocationEnabled: boolean;
+      inHomeSetup: boolean;
+      isBuyable: boolean;
+      isElectronic: boolean;
+    };
+  };
 }
+
+export type DeliveryOptions = {
+  displayName: string;
+  date: string;
+  shippingCost: string;
+  additionalContent: string | null;
+};
 
 export type FormSchema = {
   model: Model;

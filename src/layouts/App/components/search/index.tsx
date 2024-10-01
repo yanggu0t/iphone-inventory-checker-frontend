@@ -8,7 +8,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { set, useForm, useFormState } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useStore } from "@/stores";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -46,12 +46,12 @@ const ModelSchema = z.object({
       part_number: z.string(),
       color: z.string(),
       capacity: z.string(),
+      image_url: z.string(),
     }),
   ),
 });
 
 const SearchForm: React.FC<SearchFormProps> = ({ config }) => {
-  const navigate = useNavigate();
   const { search } = config;
   const langTag = getLocalStorage(LOCAL_STORAGE.APPLE_LANG_TAG) as string;
   const setLangTag = useStore((state) => state.apple.setLangTag);
@@ -90,8 +90,8 @@ const SearchForm: React.FC<SearchFormProps> = ({ config }) => {
   });
 
   const formValues = form.getValues();
-  const storages = formValues ? formValues.model?.capacities : [];
-  const colors = formValues ? formValues.model?.colors : [];
+  const storages = formValues.model?.capacities ?? [];
+  const colors = formValues.model?.colors ?? [];
 
   const onSubmit = () => {
     setFormData(formValues);
@@ -165,119 +165,135 @@ const SearchForm: React.FC<SearchFormProps> = ({ config }) => {
                 )}
               />
             </CarouselItem>
-            <CarouselItem className="p-3">
-              <FormField
-                control={form.control}
-                name="storage"
-                render={({ field }) => (
-                  <FormItem>
-                    <Typography variant="h2" className="mb-4">
-                      Storage.
-                      <span className="text-[#86868b]">
-                        {` How much space do you need?`}
-                      </span>
-                    </Typography>
-                    <FormControl>
-                      <RadioGroup
-                        defaultValue={field.value}
-                        onValueChange={field.onChange}
-                        className="space-y-2"
-                      >
-                        {carouselIndex === 1 &&
-                          storages.map((item) => (
-                            <FormItem
-                              key={item}
-                              className="flex items-center space-x-1 space-y-0 rounded-lg border [&:has([data-state=checked])]:border-2 [&:has([data-state=checked])]:border-[#0071e3]"
-                            >
-                              <FormControl>
-                                <RadioGroupItem
-                                  value={item}
-                                  className="sr-only"
-                                />
-                              </FormControl>
-                              <FormLabel className="flex-grow p-4 font-normal">
-                                {item}
-                              </FormLabel>
-                            </FormItem>
-                          ))}
-                      </RadioGroup>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CarouselItem>
-            <CarouselItem className="p-3">
-              <FormField
-                control={form.control}
-                name="color"
-                render={({ field }) => (
-                  <FormItem>
-                    <Typography variant="h2" className="mb-4">
-                      Finish.
-                      <span className="text-[#86868b]">
-                        {` Pick your favorite.`}
-                      </span>
-                    </Typography>
-                    <FormControl>
-                      <RadioGroup
-                        defaultValue={field.value}
-                        onValueChange={field.onChange}
-                        className="space-y-2"
-                      >
-                        {carouselIndex === 2 &&
-                          colors.map((item) => (
-                            <FormItem
-                              key={item.code}
-                              className="flex items-center space-x-1 space-y-0 rounded-lg border [&:has([data-state=checked])]:border-2 [&:has([data-state=checked])]:border-[#0071e3]"
-                            >
-                              <FormControl>
-                                <RadioGroupItem
-                                  value={item.code}
-                                  className="sr-only"
-                                />
-                              </FormControl>
-                              <FormLabel className="flex flex-grow items-center gap-2 p-4 font-normal">
-                                <img
-                                  className="aspect-square h-6 w-6 rounded-full"
-                                  src={item.image}
-                                  alt={item.code}
-                                />
-                                {item.name}
-                              </FormLabel>
-                            </FormItem>
-                          ))}
-                      </RadioGroup>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CarouselItem>
-            <CarouselItem className="p-3">
-              <FormField
-                control={form.control}
-                name="zipCode"
-                render={({ field }) => (
-                  <FormItem>
-                    <Typography variant="h2" className="mb-4">
-                      ZIP.
-                      <span className="text-[#86868b]">
-                        {` Please provide your postal code.`}
-                      </span>
-                    </Typography>
-                    <FormLabel>請輸入郵遞區號</FormLabel>
-                    <FormControl>
-                      <Input placeholder="shadcn" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button className="mt-4" type="submit">
-                Search
-              </Button>
-            </CarouselItem>
+
+            {[
+              !!storages.length && (
+                <CarouselItem className="p-3">
+                  <FormField
+                    control={form.control}
+                    name="storage"
+                    render={({ field }) => (
+                      <FormItem>
+                        <Typography variant="h2" className="mb-4">
+                          Storage.
+                          <span className="text-[#86868b]">
+                            {` How much space do you need?`}
+                          </span>
+                        </Typography>
+                        <FormControl>
+                          <RadioGroup
+                            defaultValue={field.value}
+                            onValueChange={field.onChange}
+                            className="space-y-2"
+                          >
+                            {carouselIndex === 1 &&
+                              storages.map((item) => (
+                                <FormItem
+                                  key={item}
+                                  className="flex items-center space-x-1 space-y-0 rounded-lg border [&:has([data-state=checked])]:border-2 [&:has([data-state=checked])]:border-[#0071e3]"
+                                >
+                                  <FormControl>
+                                    <RadioGroupItem
+                                      value={item}
+                                      className="sr-only"
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="flex-grow p-4 font-normal">
+                                    {item}
+                                  </FormLabel>
+                                </FormItem>
+                              ))}
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CarouselItem>
+              ),
+            ].filter(Boolean)}
+
+            {[
+              !!colors.length && (
+                <CarouselItem className="p-3">
+                  <FormField
+                    control={form.control}
+                    name="color"
+                    render={({ field }) => (
+                      <FormItem>
+                        <Typography variant="h2" className="mb-4">
+                          Finish.
+                          <span className="text-[#86868b]">
+                            {` Pick your favorite.`}
+                          </span>
+                        </Typography>
+                        <FormControl>
+                          <RadioGroup
+                            defaultValue={field.value}
+                            onValueChange={field.onChange}
+                            className="space-y-2"
+                          >
+                            {carouselIndex === 2 &&
+                              colors.map((item) => (
+                                <FormItem
+                                  key={item.code}
+                                  className="flex items-center space-x-1 space-y-0 rounded-lg border [&:has([data-state=checked])]:border-2 [&:has([data-state=checked])]:border-[#0071e3]"
+                                >
+                                  <FormControl>
+                                    <RadioGroupItem
+                                      value={item.code}
+                                      className="sr-only"
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="flex flex-grow items-center gap-2 p-4 font-normal">
+                                    <img
+                                      className="aspect-square h-6 w-6 rounded-full"
+                                      src={item.image}
+                                      alt={item.code}
+                                    />
+                                    {item.name}
+                                  </FormLabel>
+                                </FormItem>
+                              ))}
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CarouselItem>
+              ),
+            ].filter(Boolean)}
+
+            {[
+              !!storages.length && !!colors.length && (
+                <CarouselItem className="p-3">
+                  <FormField
+                    control={form.control}
+                    name="zipCode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <Typography variant="h2" className="mb-4">
+                          ZIP.
+                          <span className="text-[#86868b]">
+                            {` Please provide your postal code.`}
+                          </span>
+                        </Typography>
+                        {/* //TODO 改成 search config 裡面的對應語言的 */}
+                        <FormLabel>請輸入郵遞區號</FormLabel>
+                        <FormControl>
+                          <Input placeholder="shadcn" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button className="mt-4" type="submit">
+                    Search
+                  </Button>
+                </CarouselItem>
+              ),
+            ].filter(Boolean)}
           </CarouselContent>
           <CarouselNavigation
             className="absolute -bottom-20 left-auto top-auto w-full justify-end gap-2"
