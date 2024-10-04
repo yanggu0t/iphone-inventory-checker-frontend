@@ -1,4 +1,8 @@
-import { FormatModelStock, modelStock } from "@/service/types/apple";
+import {
+  FormatModelStock,
+  FormSchema,
+  modelStock,
+} from "@/service/types/apple";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -65,4 +69,10 @@ export const formatModelStock = (content: modelStock) => {
   );
 
   return models;
+};
+
+export const getIsEnable = (formValues: Partial<FormSchema>) => {
+  const { model, storage, color, zipCode } = formValues;
+  // console.log(formValues, "tool");
+  return Boolean(model && storage && color && zipCode);
 };

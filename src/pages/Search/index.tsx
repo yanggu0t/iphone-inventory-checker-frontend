@@ -5,7 +5,7 @@ import { Typography } from "@/components/ui/typography";
 import { getModelsStock } from "@/service/api/apple";
 import { FormSchema } from "@/service/types/apple";
 import { useStore } from "@/stores";
-import { formatModelStock } from "@/utils/tools";
+import { formatModelStock, getIsEnable } from "@/utils/tools";
 import { useQuery } from "@tanstack/react-query";
 
 const Search = () => {
@@ -16,6 +16,8 @@ const Search = () => {
   const currentModel = model?.part_numbers.find(
     (item) => item.color === color && item.capacity === storage,
   );
+
+  const isEnable = getIsEnable(formValues);
 
   const { data, isLoading } = useQuery({
     queryKey: ["search", formValues],
@@ -32,7 +34,7 @@ const Search = () => {
       });
       return response.data ?? null;
     },
-    enabled: Object.keys(formValues).length > 0,
+    enabled: isEnable,
     gcTime: 0,
     refetchOnWindowFocus: false,
   });

@@ -93,10 +93,6 @@ const SearchForm: React.FC<SearchFormProps> = ({ config }) => {
   const storages = formValues.model?.capacities ?? [];
   const colors = formValues.model?.colors ?? [];
 
-  const onSubmit = () => {
-    setFormData(formValues);
-  };
-
   const { data: modelData } = useQuery({
     queryKey: ["models"],
     queryFn: async () => {
@@ -110,9 +106,11 @@ const SearchForm: React.FC<SearchFormProps> = ({ config }) => {
 
   if (!search || !modelData) return <Loading />;
 
+  console.log(formValues, "form");
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form>
         <Carousel
           index={carouselIndex}
           onIndexChange={setCarouselIndex}
@@ -139,6 +137,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ config }) => {
                             (model) => model.id === value,
                           );
                           field.onChange(selectedModel);
+                          setFormData(formValues);
                         }}
                         className="space-y-2"
                       >
@@ -183,7 +182,10 @@ const SearchForm: React.FC<SearchFormProps> = ({ config }) => {
                         <FormControl>
                           <RadioGroup
                             defaultValue={field.value}
-                            onValueChange={field.onChange}
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              setFormData(formValues);
+                            }}
                             className="space-y-2"
                           >
                             {carouselIndex === 1 &&
@@ -280,17 +282,17 @@ const SearchForm: React.FC<SearchFormProps> = ({ config }) => {
                           </span>
                         </Typography>
                         {/* //TODO 改成 search config 裡面的對應語言的 */}
-                        <FormLabel>請輸入郵遞區號</FormLabel>
+                        <FormLabel>{search.zipMessage}</FormLabel>
                         <FormControl>
-                          <Input placeholder="shadcn" {...field} />
+                          <Input
+                            placeholder={search.validation?.zip?.requiredError}
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <Button className="mt-4" type="submit">
-                    Search
-                  </Button>
                 </CarouselItem>
               ),
             ].filter(Boolean)}
