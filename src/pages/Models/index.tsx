@@ -14,7 +14,7 @@ const Models = () => {
   const params = useLocation().search as currentModelStockParams;
   const config = useStore((state) => state.apple.config);
   const search = config?.search;
-  const [isOnline, setIsOnline] = useState(false);
+  const [isLive, setIsLive] = useState(false);
 
   const { data } = useQuery({
     queryKey: ["stock"],
@@ -28,7 +28,7 @@ const Models = () => {
     },
     gcTime: 0,
     enabled: !!search,
-    refetchInterval: isOnline && 2000,
+    refetchInterval: isLive && 2000,
   });
 
   const formatModel =
@@ -40,9 +40,9 @@ const Models = () => {
     <div className="p-4">
       <div className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
         <div className="space-y-0.5">
-          <Typography variant="h5">Online Search</Typography>
+          <Typography variant="h5">Live Search</Typography>
         </div>
-        <Switch checked={isOnline} onCheckedChange={setIsOnline} />
+        <Switch checked={isLive} onCheckedChange={setIsLive} />
       </div>
       <Result stock={formatModel} />
       {/* <h1>可用型號</h1>

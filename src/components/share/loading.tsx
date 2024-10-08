@@ -1,8 +1,18 @@
 import { Spinner } from "@/components/ui/spinner";
+import { cn } from "@/utils/tools";
 
-const Loading = () => {
+interface IProps {
+  className?: string;
+}
+
+const Loading = ({ className }: IProps) => {
   return (
-    <div className="flex h-full w-full items-center justify-center">
+    <div
+      className={cn(
+        "flex h-full w-full items-center justify-center",
+        className,
+      )}
+    >
       <Spinner className="opacity-50" />
     </div>
   );

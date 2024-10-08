@@ -46,11 +46,14 @@ const CountrySelector = ({ className, setLocalLangTag }: IProps) => {
         </SelectTrigger>
         {data ? (
           <SelectContent>
-            {data.map(({ id, country, lang_tag }) => (
-              <SelectItem key={id} value={lang_tag || "lang-tag"}>
-                {country}
-              </SelectItem>
-            ))}
+            {data.map(({ id, country, lang_tag }) => {
+              if (lang_tag === "cn") return null;
+              return (
+                <SelectItem key={id} value={lang_tag || "lang-tag"}>
+                  {country}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         ) : (
           <SelectContent className={isLoading ? "h-[300px] w-full" : ""}>

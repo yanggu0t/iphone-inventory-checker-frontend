@@ -1,12 +1,12 @@
 import Loading from "@/components/share/loading";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Switch } from "@/components/ui/switch";
 import { Typography } from "@/components/ui/typography";
 import { getModelsStock } from "@/service/api/apple";
 import { FormSchema } from "@/service/types/apple";
 import { useStore } from "@/stores";
 import { formatModelStock, getIsEnable } from "@/utils/tools";
 import { useQuery } from "@tanstack/react-query";
+import { Fragment, useEffect, useMemo, useState } from "react";
 
 const Search = () => {
   const formValues = useStore((state) => state.apple.formData) ?? {};
@@ -16,10 +16,11 @@ const Search = () => {
   const currentModel = model?.part_numbers.find(
     (item) => item.color === color && item.capacity === storage,
   );
+  const [isLive, setIsLive] = useState(false);
 
   const isEnable = getIsEnable(formValues);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isFetching } = useQuery({
     queryKey: ["search", formValues],
     queryFn: async () => {
       if (!search) return null;
@@ -37,13 +38,12 @@ const Search = () => {
     enabled: isEnable,
     gcTime: 0,
     refetchOnWindowFocus: false,
+    refetchInterval: isLive ? 1500 : false,
   });
 
-  const formatModel =
-    data && "content" in data ? formatModelStock(data.content)[0] : null;
-
-  const { pickup, delivery, productName } = formatModel ?? {};
-  const { image_url } = currentModel ?? {};
+  const formatStock = data?.content
+    ? formatModelStock(data.content)[0]
+    : undefined;
 
   if (!model || !storage || !color || !zipCode)
     return (
@@ -54,35 +54,52 @@ const Search = () => {
       </div>
     );
 
-  if (!formatModel) return <Loading />;
+  if (!formatStock) return <Loading />;
+
+  const { productName, pickup } = formatStock;
+  const { image_url } = currentModel ?? {};
 
   return (
-    <div className="flex h-[calc(100%-52px)] flex-col overflow-auto p-3">
-      <div className="flex items-center gap-2">
+    <div className="relative flex h-[calc(100%-52px)] flex-col gap-3 overflow-auto p-3">
+      {(isLoading || isFetching) && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/50">
+          <Loading className="text-white" />
+        </div>
+      )}
+      <div className="flex flex-row items-center justify-between rounded-lg border p-2 shadow-sm">
         <img
-          className="h-[90px] w-[85.2px] rounded-lg"
+          className="mx-auto h-[90px] w-[85.2px] rounded-lg"
           src={image_url}
           alt={productName}
         />
-        <Typography variant="h5">{productName}</Typography>
+        <Typography className="mx-auto" variant="h5">
+          {productName}
+        </Typography>
       </div>
-      <RadioGroup>
-        {pickup?.stores.map((item) => {
-          return (
-            <div className="flex items-center space-x-1 space-y-0 rounded-lg border">
-              <RadioGroupItem
-                className="sr-only"
-                disabled={true}
-                value={item.storeNumber}
-                id={item.storeNumber}
-              />
-              <Label className="flex-grow p-4" htmlFor={item.storeNumber}>
-                {item.storeName}
-              </Label>
-            </div>
-          );
-        })}
-      </RadioGroup>
+      <div className="flex flex-row items-center justify-between rounded-lg border p-2 shadow-sm">
+        <div className="space-y-0.5">
+          <Typography variant="h6">Live Search</Typography>
+        </div>
+        <Switch checked={isLive} onCheckedChange={setIsLive} />
+      </div>
+      <div className="flex flex-col">
+        {pickup.map(
+          ({ isAvailable, storeName, pickupMsg, pickupType }, idx) => (
+            <Fragment key={idx}>
+              <Typography className="rounded-none" variant="inlineCode">
+                <span
+                  className={isAvailable ? "text-green-600" : "text-red-600"}
+                >
+                  {isAvailable ? "[ In Stock ] " : "[ Out of Stock ] "}
+                </span>
+                <span>{` ${storeName} `}</span>
+                <span>{pickupMsg}</span>
+                <span>{` (${pickupType})`}</span>
+              </Typography>
+            </Fragment>
+          ),
+        )}
+      </div>
     </div>
   );
 };

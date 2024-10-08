@@ -311,9 +311,7 @@ export type Store = {
 export interface FormatModelStock {
   partNumber: string;
   productName: string;
-  pickup: {
-    stores: Store[];
-  };
+  pickup: pickup[];
   delivery: {
     compact: {
       label: string;
@@ -352,4 +350,11 @@ export type FormSchema = {
   storage: string;
   color: string;
   zipCode: string;
+};
+
+export type pickup = {
+  storeName: string;
+  isAvailable: boolean;
+  pickupMsg: string;
+  pickupType: string;
 };

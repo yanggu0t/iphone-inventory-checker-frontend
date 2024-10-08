@@ -57,11 +57,12 @@ const SearchForm: React.FC<SearchFormProps> = ({ config }) => {
   const setLangTag = useStore((state) => state.apple.setLangTag);
   const setFormData = useStore((state) => state.apple.setFormData);
   const [carouselIndex, setCarouselIndex] = useState(0);
+  const [isZipCodeValid, setIsZipCodeValid] = useState(false);
 
   const formSchema = z.object({
     model: ModelSchema as z.ZodType<Model>,
-    storage: z.string({ required_error: "Storage is required" }),
-    color: z.string({ required_error: "Color is required" }),
+    storage: z.string(),
+    color: z.string(),
     zipCode: z
       .string({
         required_error: search.validation?.zip?.requiredError,
@@ -81,6 +82,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ config }) => {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    mode: "onChange",
     defaultValues: {
       zipCode: "",
       model: undefined,
@@ -104,60 +106,59 @@ const SearchForm: React.FC<SearchFormProps> = ({ config }) => {
     refetchOnWindowFocus: false,
   });
 
-  if (!search || !modelData) return <Loading />;
+  useEffect(() => {
+    const subscription = form.watch((value) => {
+      if (value.model) {
+        setFormData(value as z.infer<typeof formSchema>);
+      }
 
-  console.log(formValues, "form");
+      if (value.zipCode) {
+        const pattern = search.validation?.zip?.pattern;
+        if (pattern) {
+          const regex = new RegExp(pattern);
+          setIsZipCodeValid(regex.test(value.zipCode));
+        }
+      } else {
+        setIsZipCodeValid(false);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, search.validation?.zip?.pattern, setFormData]);
+
+  if (!search || !modelData) return <Loading />;
 
   return (
     <Form {...form}>
-      <form>
+      <form
+        onKeyDown={(e) => {
+          if (e.key === "Enter") e.preventDefault();
+        }}
+      >
         <Carousel
           index={carouselIndex}
           onIndexChange={setCarouselIndex}
           disableDrag
         >
           <CarouselContent className="flex items-start">
-            <CarouselItem className="p-3">
+            <CarouselItem key="zip-code-item" className="p-3">
               <FormField
                 control={form.control}
-                name="model"
+                name="zipCode"
                 render={({ field }) => (
                   <FormItem>
-                    <Typography variant="h2">
-                      Model.
+                    <Typography variant="h2" className="mb-4">
+                      ZIP.
                       <span className="text-[#86868b]">
-                        {` Which is best for you?`}
+                        {` Please provide your postal code.`}
                       </span>
                     </Typography>
+                    <FormLabel>{search.zipMessage}</FormLabel>
                     <FormControl>
-                      <RadioGroup
-                        defaultValue={field.value?.id}
-                        onValueChange={(value) => {
-                          const selectedModel = modelData?.find(
-                            (model) => model.id === value,
-                          );
-                          field.onChange(selectedModel);
-                          setFormData(formValues);
-                        }}
-                        className="space-y-2"
-                      >
-                        {modelData?.map((model) => (
-                          <FormItem
-                            key={model.id}
-                            className="flex items-center space-x-1 space-y-0 rounded-lg border [&:has([data-state=checked])]:border-2 [&:has([data-state=checked])]:border-[#0071e3]"
-                          >
-                            <FormControl>
-                              <RadioGroupItem
-                                value={model.id}
-                                className="sr-only"
-                              />
-                            </FormControl>
-                            <FormLabel className="flex-grow p-4 font-normal">
-                              {model.name}
-                            </FormLabel>
-                          </FormItem>
-                        ))}
-                      </RadioGroup>
+                      <Input
+                        placeholder={search.validation?.zip?.requiredError}
+                        onVolumeChange={field.onChange}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -166,8 +167,60 @@ const SearchForm: React.FC<SearchFormProps> = ({ config }) => {
             </CarouselItem>
 
             {[
+              isZipCodeValid && (
+                <CarouselItem key="zip-code-item" className="p-3">
+                  <FormField
+                    control={form.control}
+                    name="model"
+                    render={({ field }) => (
+                      <FormItem>
+                        <Typography variant="h2">
+                          Model.
+                          <span className="text-[#86868b]">
+                            {` Which is best for you?`}
+                          </span>
+                        </Typography>
+                        <FormControl>
+                          <RadioGroup
+                            defaultValue={field.value?.id}
+                            onValueChange={(value) => {
+                              const selectedModel = modelData?.find(
+                                (model) => model.id === value,
+                              );
+                              field.onChange(selectedModel);
+                            }}
+                            className="space-y-2"
+                          >
+                            {carouselIndex === 1 &&
+                              modelData?.map((model) => (
+                                <FormItem
+                                  key={model.id}
+                                  className="flex items-center space-x-1 space-y-0 rounded-lg border [&:has([data-state=checked])]:border-2 [&:has([data-state=checked])]:border-[#0071e3]"
+                                >
+                                  <FormControl>
+                                    <RadioGroupItem
+                                      value={model.id}
+                                      className="sr-only"
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="flex-grow p-4 font-normal">
+                                    {model.name}
+                                  </FormLabel>
+                                </FormItem>
+                              ))}
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CarouselItem>
+              ),
+            ].filter(Boolean)}
+
+            {[
               !!storages.length && (
-                <CarouselItem className="p-3">
+                <CarouselItem key="storages-item" className="p-3">
                   <FormField
                     control={form.control}
                     name="storage"
@@ -182,13 +235,10 @@ const SearchForm: React.FC<SearchFormProps> = ({ config }) => {
                         <FormControl>
                           <RadioGroup
                             defaultValue={field.value}
-                            onValueChange={(value) => {
-                              field.onChange(value);
-                              setFormData(formValues);
-                            }}
+                            onValueChange={field.onChange}
                             className="space-y-2"
                           >
-                            {carouselIndex === 1 &&
+                            {carouselIndex === 2 &&
                               storages.map((item) => (
                                 <FormItem
                                   key={item}
@@ -217,7 +267,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ config }) => {
 
             {[
               !!colors.length && (
-                <CarouselItem className="p-3">
+                <CarouselItem key="color-item" className="p-3">
                   <FormField
                     control={form.control}
                     name="color"
@@ -235,7 +285,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ config }) => {
                             onValueChange={field.onChange}
                             className="space-y-2"
                           >
-                            {carouselIndex === 2 &&
+                            {carouselIndex === 3 &&
                               colors.map((item) => (
                                 <FormItem
                                   key={item.code}
@@ -258,36 +308,6 @@ const SearchForm: React.FC<SearchFormProps> = ({ config }) => {
                                 </FormItem>
                               ))}
                           </RadioGroup>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </CarouselItem>
-              ),
-            ].filter(Boolean)}
-
-            {[
-              !!storages.length && !!colors.length && (
-                <CarouselItem className="p-3">
-                  <FormField
-                    control={form.control}
-                    name="zipCode"
-                    render={({ field }) => (
-                      <FormItem>
-                        <Typography variant="h2" className="mb-4">
-                          ZIP.
-                          <span className="text-[#86868b]">
-                            {` Please provide your postal code.`}
-                          </span>
-                        </Typography>
-                        {/* //TODO 改成 search config 裡面的對應語言的 */}
-                        <FormLabel>{search.zipMessage}</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder={search.validation?.zip?.requiredError}
-                            {...field}
-                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
