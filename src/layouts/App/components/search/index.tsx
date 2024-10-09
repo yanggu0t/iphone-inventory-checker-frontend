@@ -13,7 +13,7 @@ import { useStore } from "@/stores";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import { getModels } from "@/service/api/apple";
+import { getLookupAddress, getModels } from "@/service/api/apple";
 import { Spinner } from "@/components/ui/spinner";
 import { useNavigate } from "@tanstack/react-router";
 import { getLocalStorage } from "@/utils/tools";
@@ -56,6 +56,8 @@ const SearchForm: React.FC<SearchFormProps> = ({ config }) => {
   const langTag = getLocalStorage(LOCAL_STORAGE.APPLE_LANG_TAG) as string;
   const setLangTag = useStore((state) => state.apple.setLangTag);
   const setFormData = useStore((state) => state.apple.setFormData);
+  const isResetForm = useStore((state) => state.apple.isResetForm);
+  const setIsResetForm = useStore((state) => state.apple.setIsResetForm);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [isZipCodeValid, setIsZipCodeValid] = useState(false);
 
@@ -106,10 +108,25 @@ const SearchForm: React.FC<SearchFormProps> = ({ config }) => {
     refetchOnWindowFocus: false,
   });
 
+  const isPro = (m: string) => m.includes("pro");
+
+  const getResetForm = (model: string) => {
+    if (!formValues.model) return;
+    const currentModel = formValues.model.id;
+    if (isPro(model) === isPro(currentModel)) {
+      return;
+    } else {
+      form.resetField("storage");
+      form.resetField("color");
+    }
+  };
+
   useEffect(() => {
     const subscription = form.watch((value) => {
       if (value.model) {
         setFormData(value as z.infer<typeof formSchema>);
+      } else {
+        setFormData(null);
       }
 
       if (value.zipCode) {
@@ -124,6 +141,19 @@ const SearchForm: React.FC<SearchFormProps> = ({ config }) => {
     });
     return () => subscription.unsubscribe();
   }, [form, search.validation?.zip?.pattern, setFormData]);
+
+  useEffect(() => {
+    if (isResetForm) {
+      form.reset();
+      setIsResetForm(false);
+    }
+  }, [form, isResetForm, setIsResetForm]);
+
+  useEffect(() => {
+    getLookupAddress({
+      state: "北京",
+    });
+  }, []);
 
   if (!search || !modelData) return <Loading />;
 
@@ -154,11 +184,13 @@ const SearchForm: React.FC<SearchFormProps> = ({ config }) => {
                     </Typography>
                     <FormLabel>{search.zipMessage}</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder={search.validation?.zip?.requiredError}
-                        onVolumeChange={field.onChange}
-                        {...field}
-                      />
+                      {search.countryCode !== "CN" && (
+                        <Input
+                          placeholder={search.validation?.zip?.requiredError}
+                          onVolumeChange={field.onChange}
+                          {...field}
+                        />
+                      )}
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -188,6 +220,9 @@ const SearchForm: React.FC<SearchFormProps> = ({ config }) => {
                                 (model) => model.id === value,
                               );
                               field.onChange(selectedModel);
+
+                              if (!selectedModel) return;
+                              getResetForm(selectedModel.id);
                             }}
                             className="space-y-2"
                           >

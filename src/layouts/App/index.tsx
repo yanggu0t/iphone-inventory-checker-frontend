@@ -6,13 +6,7 @@ import {
 import { cn } from "@/utils/tools";
 import { useStore } from "@/stores";
 import AnimatedBackground from "@/components/core/animated-background";
-import {
-  SlidersHorizontal,
-  Smartphone,
-  Menu,
-  ChevronLeft,
-  TabletSmartphone,
-} from "lucide-react";
+import { SlidersHorizontal, Smartphone, Menu, ChevronLeft } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Typography } from "@/components/ui/typography";
@@ -24,7 +18,6 @@ import { getConfig } from "@/service/api/apple";
 import { Tooltip } from "@radix-ui/react-tooltip";
 import { TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { Spinner } from "@/components/ui/spinner";
 import { useEffect, useState } from "react";
 import React from "react";
 import { Config } from "@/service/types/apple";
@@ -44,7 +37,7 @@ const AppLayout = () => {
   const setConfig = useStore((state) => state.apple.setConfig);
   const [type, setType] = useState<string>("multiple-models");
 
-  const { data, isFetching } = useQuery({
+  const { data, isFetching, isLoading } = useQuery({
     queryKey: ["config"],
     queryFn: async () => {
       const response = await getConfig();
@@ -62,7 +55,7 @@ const AppLayout = () => {
   }, [isAppRoot, navigate]);
 
   if (!langTag) return <CountrySelector setLocalLangTag={setLangTag} />;
-  if (isFetching) return <Loading />;
+  if (isFetching || isLoading) return <Loading />;
 
   return (
     <ResizablePanelGroup className="rounded-lg border" direction="horizontal">

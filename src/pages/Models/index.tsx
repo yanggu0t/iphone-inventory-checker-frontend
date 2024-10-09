@@ -29,6 +29,7 @@ const Models = () => {
     gcTime: 0,
     enabled: !!search,
     refetchInterval: isLive && 2000,
+    refetchOnWindowFocus: false,
   });
 
   const formatModel =

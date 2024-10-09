@@ -9,6 +9,10 @@
       "destination": "https://www.apple.com/:path*"
     },
     {
+      "source": "/apple-cn/:path*",
+      "destination": "https://www.apple.com.cn/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

@@ -5,6 +5,7 @@ import {
   ConfigResponse,
   currentModelStockRequest,
   modelStockResponse,
+  LookupAddressRequest,
 } from "../types/apple";
 
 export const getLocales = (): Promise<LocalesResponse> => {
@@ -25,4 +26,10 @@ export const getModelsStock = (
   return service.get(`/apple${request.path}`, {
     params: request.params,
   });
+};
+
+export const getLookupAddress = (
+  params: LookupAddressRequest,
+): Promise<any> => {
+  return service.get("/apple/shop/address-lookup", { params });
 };

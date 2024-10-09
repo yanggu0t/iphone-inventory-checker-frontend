@@ -6,6 +6,7 @@ export interface AppleState {
   langTag: string | null;
   isCollapsed: boolean;
   formData: FormSchema | null;
+  isResetForm: boolean;
 }
 
 export interface AppleActions {
@@ -13,6 +14,7 @@ export interface AppleActions {
   setLangTag: (lang: string | null) => void;
   setIsCollapsed(bool: boolean): void;
   setFormData: (data: FormSchema | null) => void;
+  setIsResetForm(bool: boolean): void;
 }
 
 export interface AppleSlice {
@@ -24,6 +26,7 @@ const initialState: AppleState = {
   langTag: null,
   isCollapsed: false,
   formData: null,
+  isResetForm: false,
 };
 
 export const createAppleSlice: ImmerStateCreator<AppleSlice> = (set) => ({
@@ -47,6 +50,11 @@ export const createAppleSlice: ImmerStateCreator<AppleSlice> = (set) => ({
     setFormData: (data) => {
       set((state) => {
         state.apple.formData = data;
+      });
+    },
+    setIsResetForm: (bool) => {
+      set((state) => {
+        state.apple.isResetForm = bool;
       });
     },
   },

@@ -20,6 +20,7 @@ interface IProps {
 
 const CountrySelector = ({ className, setLocalLangTag }: IProps) => {
   const setLangTag = useStore((state) => state.apple.setLangTag);
+  const setIsResetForm = useStore((state) => state.apple.setIsResetForm);
   const { data, isLoading } = useQuery({
     queryKey: ["locales"],
     queryFn: async () => {
@@ -32,6 +33,7 @@ const CountrySelector = ({ className, setLocalLangTag }: IProps) => {
   const handleLanguageChange = (lang: string) => {
     setLangTag(lang);
     setLocalLangTag(lang);
+    setIsResetForm(true);
   };
 
   return (
@@ -47,7 +49,7 @@ const CountrySelector = ({ className, setLocalLangTag }: IProps) => {
         {data ? (
           <SelectContent>
             {data.map(({ id, country, lang_tag }) => {
-              if (lang_tag === "cn") return null;
+              // if (lang_tag === "cn") return null;
               return (
                 <SelectItem key={id} value={lang_tag || "lang-tag"}>
                   {country}

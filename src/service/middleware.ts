@@ -12,6 +12,9 @@ service.interceptors.request.use((config) => {
   if (url && url.includes("/api")) {
     config.headers["Accept-Language"] = lang;
   }
+  if (url && url.startsWith("/apple") && lang === "cn") {
+    config.url = url.replace(/^\/apple/, "/apple-cn");
+  }
   return config;
 });
 
@@ -19,7 +22,7 @@ service.interceptors.response.use(
   (response) => {
     const url = response.headers["access-control-allow-origin"];
 
-    if (url === "https://www.apple.com") {
+    if (url.includes("https://www.apple.com")) {
       return Promise.resolve({
         data: response.data["body"],
         msg: response.statusText,

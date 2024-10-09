@@ -17,6 +17,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
+      "/apple-cn": {
+        target: "https://www.apple.com.cn",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/apple-cn/, ""),
+      },
       "/apple": {
         target: "https://www.apple.com",
         changeOrigin: true,

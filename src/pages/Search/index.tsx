@@ -6,24 +6,28 @@ import { FormSchema } from "@/service/types/apple";
 import { useStore } from "@/stores";
 import { formatModelStock, getIsEnable } from "@/utils/tools";
 import { useQuery } from "@tanstack/react-query";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useState } from "react";
 
 const Search = () => {
   const formValues = useStore((state) => state.apple.formData) ?? {};
   const config = useStore((state) => state.apple.config);
+  const isResetForm = useStore((state) => state.apple.isResetForm);
   const search = config?.search;
   const { model, storage, color, zipCode } = formValues as FormSchema;
   const currentModel = model?.part_numbers.find(
     (item) => item.color === color && item.capacity === storage,
   );
   const [isLive, setIsLive] = useState(false);
+  const [fetchCount, setFetchCount] = useState(0);
+  const [inStockCount, setInStockCount] = useState(0);
 
   const isEnable = getIsEnable(formValues);
 
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ["search", formValues],
     queryFn: async () => {
-      if (!search) return null;
+      if (!search || isResetForm) return null;
+      setFetchCount((prev) => prev + 1); // 增加 API 請求計數
       const response = await getModelsStock({
         path: search.pickupURL,
         params: {
@@ -33,7 +37,14 @@ const Search = () => {
           cppart: "UNLOCKED/WW",
         },
       });
-      return response.data ?? null;
+      const responseData = response.data ?? null;
+      if (responseData && responseData.content) {
+        const stockData = formatModelStock(responseData.content)[0];
+        if (stockData.pickup.some((store) => store.isAvailable)) {
+          setInStockCount((prev) => prev + 1); // 如果有庫存，增加計數
+        }
+      }
+      return responseData;
     },
     enabled: isEnable,
     gcTime: 0,
