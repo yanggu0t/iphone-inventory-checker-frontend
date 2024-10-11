@@ -17,7 +17,7 @@ const appRoute = createRoute({
   component: AppLayout,
 });
 
-const routeTree = rootRoute.addChildren([]);
+const routeTree = rootRoute.addChildren([appRoute]);
 
 export const router = createRouter({
   routeTree,
